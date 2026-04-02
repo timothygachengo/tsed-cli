@@ -77,8 +77,10 @@ describe("InitCmd", () => {
     const runtime = prompts.find((prompt: any) => prompt.name === "runtime");
     const packageManager = prompts.find((prompt: any) => prompt.name === "packageManager");
 
-    expect(runtime.choices.map((choice: any) => choice.value)).toEqual(["bun"]);
-    expect(packageManager.choices.map((choice: any) => choice.value)).toEqual(["bun"]);
+    expect(runtime).toBeDefined();
+    expect(packageManager).toBeDefined();
+    expect((runtime as any).choices.map((choice: any) => choice.value)).toEqual(["bun"]);
+    expect((packageManager as any).choices.map((choice: any) => choice.value)).toEqual(["bun"]);
   });
 
   it("should force bun runtime and package manager in bunx mode", async () => {
@@ -95,5 +97,19 @@ describe("InitCmd", () => {
 
     expect(mapped.runtime).toEqual("bun");
     expect(mapped.packageManager).toEqual("bun");
+  });
+
+  it("should write premium RC files without returning task-like results", async () => {
+    const command = await CliPlatformTest.invoke<InitCmd>(InitCmd);
+    const createFromTemplate = vi.spyOn((command as any).project, "createFromTemplate").mockResolvedValue({rendered: true});
+
+    const result = await (command as any).writeRcFiles({
+      premium: true
+    });
+
+    expect(result).toBeUndefined();
+    expect(createFromTemplate).toHaveBeenCalledTimes(2);
+    expect(createFromTemplate).toHaveBeenNthCalledWith(1, ".npmrc", {premium: true});
+    expect(createFromTemplate).toHaveBeenNthCalledWith(2, ".yarnrc", {premium: true});
   });
 });

@@ -11,6 +11,7 @@ import {
   type CommandProvider,
   Configuration,
   inject,
+  PackageManager,
   PackageManagersModule,
   ProjectPackageJson,
   type Task
@@ -72,11 +73,11 @@ export class InitCmd implements CommandProvider {
     const forceBunRuntime = this.isLaunchedWithBunx();
     const packageManagers = forceBunRuntime ? this.filterOnlyBun(this.packageManagers.list()) : this.packageManagers.list();
     const runtimes = forceBunRuntime ? this.filterOnlyBun(this.runtimes.list()) : this.runtimes.list();
-    const promptOptions = forceBunRuntime
+    const promptOptions: Partial<InitOptions> = forceBunRuntime
       ? {
           ...initialOptions,
           runtime: "bun",
-          packageManager: "bun"
+          packageManager: PackageManager.BUN
         }
       : initialOptions;
 
@@ -131,6 +132,10 @@ export class InitCmd implements CommandProvider {
     return filtered.length ? filtered : values;
   }
 
+  protected async writeRcFiles(ctx: InitOptions) {
+    await Promise.all([render(".npmrc", ctx), render(".yarnrc", ctx)]);
+  }
+
   preExec(ctx: InitOptions) {
     this.fs.ensureDirSync(this.packageJson.cwd);
 
@@ -147,9 +152,7 @@ export class InitCmd implements CommandProvider {
         {
           title: "Write RC files",
           skip: () => !ctx.premium,
-          task: () => {
-            return Promise.all([render(".npmrc", ctx), render(".yarnrc", ctx)]);
-          }
+          task: () => this.writeRcFiles(ctx)
         },
         {
           title: "Initialize package.json",

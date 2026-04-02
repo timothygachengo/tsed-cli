@@ -1,4 +1,4 @@
-import {hasFeature, hasValue} from "./hasFeature.js";
+import {hasFeature, hasValue, hasValuePremium} from "./hasFeature.js";
 
 describe("hasValue", () => {
   it("should return false", () => {
@@ -17,6 +17,26 @@ describe("hasFeature", () => {
     expect(
       hasFeature("feat")({
         features: ["feat"]
+      })
+    ).toEqual(true);
+  });
+});
+
+describe("hasValuePremium", () => {
+  it("should return false when no premium feature is selected", () => {
+    expect(
+      hasValuePremium()({
+        features: ["config"],
+        featuresConfig: ["config:envs", "config:dotenv"]
+      })
+    ).toEqual(false);
+  });
+
+  it("should return true when a premium feature is selected in featuresConfig", () => {
+    expect(
+      hasValuePremium()({
+        features: ["config"],
+        featuresConfig: ["config:envs", "config:postgres:premium"]
       })
     ).toEqual(true);
   });
