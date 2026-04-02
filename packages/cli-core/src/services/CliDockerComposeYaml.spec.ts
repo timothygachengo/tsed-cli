@@ -63,6 +63,19 @@ describe("CliDockerComposeYaml", () => {
       expect(cliYaml.read).not.toHaveBeenCalled();
       expect(result).toEqual({});
     });
+
+    it("should read the discovered docker-compose file path", async () => {
+      const fs = {
+        exists: vi.fn().mockReturnValue(false),
+        findUpFile: vi.fn().mockReturnValue("/repo/docker-compose.yml")
+      };
+      const {service, cliYaml} = await createService({fs});
+
+      const result = await service.read();
+
+      expect(cliYaml.read).toHaveBeenCalledWith("/repo/docker-compose.yml");
+      expect(result).toEqual({});
+    });
   });
 
   describe("write()", () => {

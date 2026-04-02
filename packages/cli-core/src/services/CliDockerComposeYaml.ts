@@ -20,7 +20,7 @@ export class CliDockerComposeYaml {
     const file = !this.fs.exists(path) ? this.fs.findUpFile(this.projectPackageJson.dir, path) : path;
 
     if (file) {
-      return this.cliYaml.read("docker-compose.yml");
+      return this.cliYaml.read(file);
     }
 
     return Promise.resolve({});
